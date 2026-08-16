@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createClient, createMemoryFetch } from "../src/peergos-sdk.mjs";
-import { listInbox, parseReceipt, scopeRank } from "../src/lib.mjs";
+import { listInbox, parseReceipt, scopeRank, enqueueStamp, TS_SUBJECT } from "../src/lib.mjs";
 
 const fetchImpl = createMemoryFetch();
 const client = createClient(fetchImpl);
@@ -16,4 +16,10 @@ assert.equal(scopeRank("shared"), 2);
 assert.equal(scopeRank("global"), 3);
 assert.equal(scopeRank("nope"), 0);
 assert.equal(parseReceipt(null).ok, false);
+const p = await enqueueStamp(client, { hash: "sha256:ab", cube_id: "C1", scope: "local" });
+assert.equal(p, "/outbox/C1-ts.json");
+const env = JSON.parse(fetchImpl.store.get(p));
+assert.equal(env.subject, TS_SUBJECT);
+assert.equal(env.payload.scope, "local");
+await assert.rejects(() => enqueueStamp(client, { cube_id: "C1" }), /hash/);
 console.log("timestamp-inbox tests ok");

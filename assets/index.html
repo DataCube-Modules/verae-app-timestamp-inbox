@@ -16,7 +16,11 @@ button, select { background:var(--card); color:var(--fg); border:1px solid var(-
 </head>
 <body>
 <h1>Timestamp inbox</h1>
-<p>Reads connector replies in /inbox. Local=1 Shared=2 Global=3.</p>
+<p>Reads connector replies in /inbox. Local=1 Shared=2 Global=3. Request stamp writes verae.ts.request.</p>
+<label>Cube <input id="cid" value="WINE-1"/></label>
+<label>Hash <input id="hash" value="sha256:00" size="40"/></label>
+<label>Scope <select id="scope"><option>local</option><option>shared</option><option>global</option></select></label>
+<button id="stamp">Request stamp</button>
 <button id="load">Load inbox</button>
 <div id="out"></div>
 <div id="log"></div>
@@ -24,6 +28,18 @@ button, select { background:var(--card); color:var(--fg); border:1px solid var(-
 <script>
   const log = (m) => { document.getElementById("log").textContent += m + "\n"; };
   function rank(s) { return s==="global"?3:s==="shared"?2:s==="local"?1:0; }
+  document.getElementById("stamp").onclick = async () => {
+    const S = window.VeraeSDK;
+    const client = S.createClient();
+    const cube = document.getElementById("cid").value.trim();
+    const hash = document.getElementById("hash").value.trim();
+    const scope = document.getElementById("scope").value;
+    try {
+      const env = S.makeEnvelope("verae.ts.request", { hash, cube_id: cube, scope }, cube + ".ts.json");
+      await S.enqueue(client, cube + "-ts", env);
+      log("queued stamp " + cube + " " + scope);
+    } catch (e) { log(e.message); }
+  };
   document.getElementById("load").onclick = async () => {
     const client = window.VeraeSDK.createClient();
     try {
