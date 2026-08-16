@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "displayName": "TS Inbox",
+  "description": "Show Local/Shared/Global timestamp receipts from inbox",
+  "version": "0.1.0",
+  "author": "Verae",
+  "launchable": true,
+  "folderAction": false,
+  "fileExtensions": [],
+  "permissions": [
+    "STORE_APP_DATA"
+  ]
+}

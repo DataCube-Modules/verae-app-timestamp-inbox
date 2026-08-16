@@ -1,0 +1,73 @@
+# TS Inbox
+
+Show Local/Shared/Global timestamp receipts from inbox
+
+Specialist: Timestamp engineer + JS.
+# Installation — TS Inbox
+
+## Requirements
+
+- Peergos account on a Verae host
+- Permissions: STORE_APP_DATA
+- For outbox subjects: desktop-host connector running
+
+## Steps
+
+1. Copy `peergos-app.json` and `assets/` into Drive (or use OrgTool / gallery).
+2. Context menu on `peergos-app.json` → **Install App**.
+3. Open from Apps launcher.
+4. Dark theme: Peergos passes `?theme=dark-mode`.
+
+## Uninstall
+
+Apps launcher → remove `TS Inbox`. Data remains under `/.apps/` until deleted.
+# Developer reference — verae-app-timestamp-inbox
+
+## Layout
+
+```
+peergos-app.json
+assets/index.html
+assets/sdk.js
+src/peergos-sdk.mjs
+src/lib.mjs
+tests/lib.test.mjs
+tests/certify-peergos.sh
+```
+
+## Integration
+
+Sandbox `fetch` → `/peergos-api/v0/data`.  
+Outbox JSON → connector → NATS (`verae-nats-bus/schemas/subjects.json`).  
+Inbox JSON → app lists `/inbox/`.
+
+## Tests
+
+`make test` runs Node unit tests against an in-memory `fetch`.  
+`make certify` adds Peergos compliance (manifest bounds, no NATS/WebSocket).
+
+# Function specs — timestamp-inbox
+
+Specialist: Timestamp + JS.
+
+## listInbox(client) → Promise<string[]>
+JSON filenames in `/inbox/`.
+
+## parseReceipt(obj) → {scope, hash, cube_id, ok}
+Defaults scope to local; ok iff hash present.
+
+## scopeRank(scope) → 0|1|2|3
+local=1 shared=2 global=3 else 0.
+
+# Function specs — timestamp-inbox
+
+Specialist: Timestamp + JS.
+
+## listInbox(client) → Promise<string[]>
+JSON filenames in `/inbox/`.
+
+## parseReceipt(obj) → {scope, hash, cube_id, ok}
+Defaults scope to local; ok iff hash present.
+
+## scopeRank(scope) → 0|1|2|3
+local=1 shared=2 global=3 else 0.

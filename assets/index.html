@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>TS Inbox</title>
+  <style>
+:root { --bg:#0a0a0f; --fg:#e0e0e0; --accent:#00d4aa; --muted:#9090a0; --card:#1a1a25; --bd:#2a2a3a; }
+body.dark-mode, body { font-family: system-ui, sans-serif; background:var(--bg); color:var(--fg); margin:0; padding:1.5rem; }
+h1 { color:var(--accent); font-size:1.25rem; }
+button, select { background:var(--card); color:var(--fg); border:1px solid var(--bd); padding:.5rem .8rem; margin:.25rem .25rem 0 0; }
+#log { white-space:pre-wrap; font:12px ui-monospace,monospace; color:var(--muted); margin-top:1rem; }
+.card { border:1px solid var(--bd); padding:.75rem; margin:.4rem 0; border-radius:8px; }
+.row { display:flex; flex-wrap:wrap; gap:.5rem; }
+</style>
+</head>
+<body>
+<h1>Timestamp inbox</h1>
+<p>Reads connector replies in /inbox. Local=1 Shared=2 Global=3.</p>
+<button id="load">Load inbox</button>
+<div id="out"></div>
+<div id="log"></div>
+<script src="sdk.js"></script>
+<script>
+  const log = (m) => { document.getElementById("log").textContent += m + "\n"; };
+  function rank(s) { return s==="global"?3:s==="shared"?2:s==="local"?1:0; }
+  document.getElementById("load").onclick = async () => {
+    const client = window.VeraeSDK.createClient();
+    try {
+      const listing = await client.list("/inbox");
+      const files = listing.files.filter((f) => f.endsWith(".json"));
+      let html = "";
+      for (const f of files) {
+        const obj = await client.readJSON("/inbox/" + f);
+        const scope = obj.scope || (obj.receipt && obj.receipt.scope) || "local";
+        const hash = obj.hash || (obj.receipt && obj.receipt.hash) || "";
+        html += "<div class=\"card\">" + f + " scope=" + scope + " rank=" + rank(scope) + " hash=" + hash + "</div>";
+      }
+      document.getElementById("out").innerHTML = html || "<p>Empty inbox</p>";
+      log("loaded " + files.length);
+    } catch (e) { log(e.message); }
+  };
+</script>
+
+</body>
+</html>
